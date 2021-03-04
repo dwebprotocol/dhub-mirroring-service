@@ -1,37 +1,37 @@
 {
-  "name": "hyperspace-mirroring-service",
-  "version": "1.0.6",
-  "description": "A Hyperspace service with a RPC API for mirroring.",
+  "name": "@dhub/mirroring-service",
+  "version": "1.0.0",
+  "description": "A dHub service with an RPC API for mirroring.",
   "main": "index.js",
   "scripts": {
-    "build": "hrpc rpc/schema.proto --rpc=rpc/index.js --messages=rpc/messages.js",
+    "build": "drpc rpc/schema.proto --rpc=rpc/index.js --messages=rpc/messages.js",
     "test": "standard && tape test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andrewosh/hyperspace-mirroring-service.git"
+    "url": "https://github.com/dwebprotocol/dhub-mirroring-service.git"
   },
   "keywords": [
-    "hyperspace",
+    "dhub",
     "seeding",
     "mirroring"
   ],
-  "author": "Andrew Osheroff <andrewosh@gmail.com>",
+  "author": "PeepsLabs <peepslabs@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/andrewosh/hyperspace-mirroring-service/issues"
+    "url": "https://github.com/dwebprotocol/dhub-mirroring-service/issues"
   },
-  "homepage": "https://github.com/andrewosh/hyperspace-mirroring-service#readme",
+  "homepage": "https://dwebx.org",
   "devDependencies": {
     "standard": "^16.0.3",
     "tape": "^5.0.1"
   },
   "dependencies": {
-    "@hyperspace/client": "^1.18.0",
-    "hrpc": "^2.2.0",
-    "hrpc-runtime": "^2.1.1",
-    "hyperbee": "^1.0.1",
-    "hyperdrive": "^10.18.0",
+    "@dhub/client": "^1.0.0",
+    "drpc": "^1.1.0",
+    "drpc-runtime": "^1.0.0",
+    "dwebtree": "^1.0.0",
+    "ddrive": "^5.0.0",
     "nanoresource-promise": "^2.0.0"
   }
 }
