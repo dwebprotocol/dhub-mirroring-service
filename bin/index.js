@@ -9,11 +9,11 @@ const argv = minimist(process.argv.slice(2), {
     port: 'p'
   }
 })
-const version = `hyperspace-mirror/${require('../package.json').version} ${process.platform}-${process.arch} node-${process.version}`
-const help = `The Hyperspace mirroring service.
+const version = `dhub-mirror/${require('../package.json').version} ${process.platform}-${process.arch} node-${process.version}`
+const help = `The dHub mirroring service.
 ${version}
 
-Usage: hyperspace-mirror [options]
+Usage: dhub-mirror [options]
 
   --host,      -h  Set unix socket name
   --port       -p  Set the port (will use TCP)
@@ -32,7 +32,7 @@ async function main () {
     host: argv.host,
     port: argv.port
   })
-  global.hyperspaceMirror = s
+  global.dhubMirror = s
 
   s.on('client-open', () => {
     console.log('Remote client opened')

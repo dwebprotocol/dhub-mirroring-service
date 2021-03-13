@@ -5,32 +5,32 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable camelcase */
 
-var encodings = require('hrpc-runtime/encodings')
-var varint = encodings.varint
-var skip = encodings.skip
+const encodings = require('drpc_dweb-runtime/encodings')
+const varint = encodings.varint
+const skip = encodings.skip
 
-var MirrorRequest = exports.MirrorRequest = {
+const MirrorRequest = exports.MirrorRequest = {
   buffer: true,
   encodingLength: null,
   encode: null,
   decode: null
 }
 
-var MirrorStatus = exports.MirrorStatus = {
+const MirrorStatus = exports.MirrorStatus = {
   buffer: true,
   encodingLength: null,
   encode: null,
   decode: null
 }
 
-var ListResponse = exports.ListResponse = {
+const ListResponse = exports.ListResponse = {
   buffer: true,
   encodingLength: null,
   encode: null,
   decode: null
 }
 
-var RPCError = exports.RPCError = {
+const RPCError = exports.RPCError = {
   buffer: true,
   encodingLength: null,
   encode: null,
@@ -48,7 +48,7 @@ function defineMirrorRequest () {
   MirrorRequest.decode = decode
 
   function encodingLength (obj) {
-    var length = 0
+    let length = 0
     if (!defined(obj.key)) throw new Error("key is required")
     var len = encodings.bytes.encodingLength(obj.key)
     length += 1 + len
@@ -62,7 +62,7 @@ function defineMirrorRequest () {
   function encode (obj, buf, offset) {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
+    const oldOffset = offset
     if (!defined(obj.key)) throw new Error("key is required")
     buf[offset++] = 10
     encodings.bytes.encode(obj.key, buf, offset)
@@ -80,21 +80,21 @@ function defineMirrorRequest () {
     if (!offset) offset = 0
     if (!end) end = buf.length
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
+    const oldOffset = offset
+    const obj = {
       key: null,
       type: ""
     }
-    var found0 = false
+    let found0 = false
     while (true) {
       if (end <= offset) {
         if (!found0) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
-      var prefix = varint.decode(buf, offset)
+      const prefix = varint.decode(buf, offset)
       offset += varint.decode.bytes
-      var tag = prefix >> 3
+      const tag = prefix >> 3
       switch (tag) {
         case 1:
         obj.key = encodings.bytes.decode(buf, offset)
@@ -118,7 +118,7 @@ function defineMirrorStatus () {
   MirrorStatus.decode = decode
 
   function encodingLength (obj) {
-    var length = 0
+    let length = 0
     if (!defined(obj.key)) throw new Error("key is required")
     var len = encodings.bytes.encodingLength(obj.key)
     length += 1 + len
@@ -134,7 +134,7 @@ function defineMirrorStatus () {
   function encode (obj, buf, offset) {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
+    const oldOffset = offset
     if (!defined(obj.key)) throw new Error("key is required")
     buf[offset++] = 10
     encodings.bytes.encode(obj.key, buf, offset)
@@ -155,24 +155,24 @@ function defineMirrorStatus () {
     if (!offset) offset = 0
     if (!end) end = buf.length
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
+    const oldOffset = offset
+    const obj = {
       key: null,
       type: "",
       mirroring: false
     }
-    var found0 = false
-    var found1 = false
-    var found2 = false
+    let found0 = false
+    let found1 = false
+    let found2 = false
     while (true) {
       if (end <= offset) {
         if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
-      var prefix = varint.decode(buf, offset)
+      const prefix = varint.decode(buf, offset)
       offset += varint.decode.bytes
-      var tag = prefix >> 3
+      const tag = prefix >> 3
       switch (tag) {
         case 1:
         obj.key = encodings.bytes.decode(buf, offset)
@@ -202,11 +202,11 @@ function defineListResponse () {
   ListResponse.decode = decode
 
   function encodingLength (obj) {
-    var length = 0
+    let length = 0
     if (defined(obj.mirroring)) {
-      for (var i = 0; i < obj.mirroring.length; i++) {
+      for (let i = 0; i < obj.mirroring.length; i++) {
         if (!defined(obj.mirroring[i])) continue
-        var len = MirrorStatus.encodingLength(obj.mirroring[i])
+        const len = MirrorStatus.encodingLength(obj.mirroring[i])
         length += varint.encodingLength(len)
         length += 1 + len
       }
@@ -217,9 +217,9 @@ function defineListResponse () {
   function encode (obj, buf, offset) {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
+    const oldOffset = offset
     if (defined(obj.mirroring)) {
-      for (var i = 0; i < obj.mirroring.length; i++) {
+      for (let i = 0; i < obj.mirroring.length; i++) {
         if (!defined(obj.mirroring[i])) continue
         buf[offset++] = 10
         varint.encode(MirrorStatus.encodingLength(obj.mirroring[i]), buf, offset)
@@ -236,8 +236,8 @@ function defineListResponse () {
     if (!offset) offset = 0
     if (!end) end = buf.length
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
+    const oldOffset = offset
+    const obj = {
       mirroring: []
     }
     while (true) {
@@ -245,9 +245,9 @@ function defineListResponse () {
         decode.bytes = offset - oldOffset
         return obj
       }
-      var prefix = varint.decode(buf, offset)
+      const prefix = varint.decode(buf, offset)
       offset += varint.decode.bytes
-      var tag = prefix >> 3
+      const tag = prefix >> 3
       switch (tag) {
         case 1:
         var len = varint.decode(buf, offset)
@@ -268,7 +268,7 @@ function defineRPCError () {
   RPCError.decode = decode
 
   function encodingLength (obj) {
-    var length = 0
+    let length = 0
     if (!defined(obj.message)) throw new Error("message is required")
     var len = encodings.string.encodingLength(obj.message)
     length += 1 + len
@@ -290,7 +290,7 @@ function defineRPCError () {
   function encode (obj, buf, offset) {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
+    const oldOffset = offset
     if (!defined(obj.message)) throw new Error("message is required")
     buf[offset++] = 10
     encodings.string.encode(obj.message, buf, offset)
@@ -318,23 +318,23 @@ function defineRPCError () {
     if (!offset) offset = 0
     if (!end) end = buf.length
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
+    const oldOffset = offset
+    const obj = {
       message: "",
       code: "",
       errno: 0,
       details: ""
     }
-    var found0 = false
+    let found0 = false
     while (true) {
       if (end <= offset) {
         if (!found0) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
-      var prefix = varint.decode(buf, offset)
+      const prefix = varint.decode(buf, offset)
       offset += varint.decode.bytes
-      var tag = prefix >> 3
+      const tag = prefix >> 3
       switch (tag) {
         case 1:
         obj.message = encodings.string.decode(buf, offset)

@@ -1,6 +1,6 @@
 const messages = require('./messages')
-const HRPC = require('hrpc-runtime')
-const RPC = require('hrpc-runtime/rpc')
+const DRPC = require('drpc_dweb-runtime')
+const RPC = require('drpc_dweb-runtime/rpc')
 
 const errorEncoding = {
   encode: messages.RPCError.encode,
@@ -16,7 +16,7 @@ const errorEncoding = {
   }
 }
 
-class HRPCServiceMirror {
+class DRPCServiceMirror {
   constructor (rpc) {
     const service = rpc.defineService({ id: 1 })
 
@@ -100,7 +100,7 @@ class HRPCServiceMirror {
   }
 }
 
-module.exports = class HRPCSession extends HRPC {
+module.exports = class DRPCSession extends DRPC {
   constructor (rawSocket, { maxSize = 2 * 1024 * 1024 * 1024 } = {}) {
     super()
 
@@ -117,7 +117,7 @@ module.exports = class HRPCSession extends HRPC {
       if ((err !== this.rawSocketError && !isStreamError(err)) || this.listenerCount('error')) this.emit('error', err)
     })
 
-    this.mirror = new HRPCServiceMirror(rpc)
+    this.mirror = new DRPCServiceMirror(rpc)
   }
 
   destroy (err) {

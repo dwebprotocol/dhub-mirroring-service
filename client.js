@@ -2,7 +2,7 @@ const net = require('net')
 const RPC = require('./rpc')
 const getNetworkOptions = require('./rpc/socket')
 
-module.exports = class HyperspaceMirroringClient {
+module.exports = class DHubMirroringClient {
   constructor (opts = {}) {
     this.opts = opts
     this._socketOpts = getNetworkOptions(opts)
@@ -33,7 +33,7 @@ module.exports = class HyperspaceMirroringClient {
   }
 
   ready () {
-    return HyperspaceMirroringClient.serverReady({ ...this.opts, noRetry: true })
+    return DHubMirroringClient.serverReady({ ...this.opts, noRetry: true })
   }
 
   close () {

@@ -4,8 +4,8 @@
   "description": "A dHub service with an RPC API for mirroring.",
   "main": "index.js",
   "scripts": {
-    "build": "drpc rpc/schema.proto --rpc=rpc/index.js --messages=rpc/messages.js",
-    "test": "standard && tape test/*.js"
+    "build": "drpc_dweb rpc/schema.proto --rpc=rpc/index.js --messages=rpc/messages.js",
+    "test": "standard --fix && tape test/*.js"
   },
   "repository": {
     "type": "git",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@dhub/client": "^1.0.0",
-    "drpc": "^1.1.0",
-    "drpc-runtime": "^1.0.0",
+    "drpc_dweb": "^1.0.0",
+    "drpc_dweb-runtime": "^1.0.0",
     "dwebtree": "^1.0.0",
     "ddrive": "^5.0.0",
     "nanoresource-promise": "^2.0.0"

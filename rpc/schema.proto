@@ -1,7 +1,7 @@
 syntax = "proto2";
 
-package hyperspace_mirror;
-import "hrpc.proto";
+package dhub_mirror;
+import "drpc_dweb.proto";
 
 message MirrorRequest {
   required bytes key = 1;
@@ -20,14 +20,14 @@ message ListResponse {
 }
 
 service Mirror {
-  option (hrpc.service) = 1;
+  option (drpc_dweb.service) = 1;
 
   // Methods
-  rpc Mirror (MirrorRequest) returns (MirrorStatus) { option (hrpc.method) = 1; }
-  rpc Unmirror (MirrorRequest) returns (MirrorStatus) { option (hrpc.method) = 2; }
-  rpc Status (MirrorRequest) returns (MirrorStatus) { option (hrpc.method) = 3; }
-  rpc List (hrpc.Void) returns (ListResponse) { option (hrpc.method) = 4; }
-  rpc Stop (hrpc.Void) returns (hrpc.Void) { option (hrpc.method) = 5; }
+  rpc Mirror (MirrorRequest) returns (MirrorStatus) { option (drpc_dweb.method) = 1; }
+  rpc Unmirror (MirrorRequest) returns (MirrorStatus) { option (drpc_dweb.method) = 2; }
+  rpc Status (MirrorRequest) returns (MirrorStatus) { option (drpc_dweb.method) = 3; }
+  rpc List (drpc_dweb.Void) returns (ListResponse) { option (drpc_dweb.method) = 4; }
+  rpc Stop (drpc_dweb.Void) returns (drpc_dweb.Void) { option (drpc_dweb.method) = 5; }
 
   // Events
 }

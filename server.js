@@ -1,15 +1,15 @@
 const { NanoresourcePromise: Nanoresource } = require('nanoresource-promise/emitter')
 const Client = require('./client')
-const HyperspaceClient = require('@hyperspace/client')
-const Hyperbee = require('hyperbee')
-const hyperdrive = require('hyperdrive')
+const DHubClient = require('@dhub/client')
+const DWebTree = require('dwebtree')
+const ddrive = require('ddrive')
 
 const RPC = require('./rpc')
 const getNetworkOptions = require('./rpc/socket.js')
 
-const DB_NAMESPACE = 'hyperspace-mirroring-service'
+const DB_NAMESPACE = 'dhub-mirroring-service'
 const DB_VERSION = 'v1'
-const CORES_SUB = 'cores'
+const BASES_SUB = 'bases'
 const TYPES_SUB = 'types'
 
 module.exports = class MirroringService extends Nanoresource {
@@ -18,7 +18,7 @@ module.exports = class MirroringService extends Nanoresource {
     this.server = RPC.createServer(opts.server, this._onConnection.bind(this))
     this.mirroring = new Set()
     this.downloads = new Map()
-    this.hsClient = null
+    this.dhClient = null
     this.db = null
 
     this._corestore = null
@@ -36,16 +36,16 @@ module.exports = class MirroringService extends Nanoresource {
     } catch (_) {}
     if (running) throw new Error('A mirroring server is already running on that host/port.')
 
-    this.hsClient = new HyperspaceClient()
-    await this.hsClient.ready()
-    this._corestore = this.hsClient.corestore(DB_NAMESPACE)
+    this.dhClient = new DHubClient()
+    await this.dhClient.ready()
+    this._corestore = this.dhClient.basestore(DB_NAMESPACE)
 
-    const rootDb = new Hyperbee(this._corestore.default(), {
+    const rootDb = new DWebTree(this._corestore.default(), {
       keyEncoding: 'utf-8',
       valueEncoding: 'json'
     }).sub(DB_VERSION)
     await rootDb.ready()
-    this.coresDb = rootDb.sub(CORES_SUB)
+    this.basesDb = rootDb.sub(BASES_SUB)
     this.typesDb = rootDb.sub(TYPES_SUB)
 
     await this.server.listen(this._socketOpts)
@@ -54,21 +54,21 @@ module.exports = class MirroringService extends Nanoresource {
 
   async _close () {
     await this.server.close()
-    for (const { core, request } of  this.downloads.values()) {
-      core.undownload(request)
+    for (const { base, request } of this.downloads.values()) {
+      base.undownload(request)
     }
     this.downloads.clear()
     this.mirroring.clear()
-    await this.hsClient.close()
+    await this.dhClient.close()
   }
 
   // Mirroring Methods
 
-  async _getDriveCores (key, replicate) {
-    const drive = hyperdrive(this._corestore, key)
+  async _getDriveBases (key, replicate) {
+    const drive = ddrive(this._corestore, key)
     drive.on('error', noop)
     await drive.promises.ready()
-    if (replicate) await this.hsClient.replicate(drive.metadata)
+    if (replicate) await this.dhClient.replicate(drive.metadata)
     return new Promise((resolve, reject) => {
       drive.getContent((err, content) => {
         if (err) return reject(err)
@@ -78,73 +78,75 @@ module.exports = class MirroringService extends Nanoresource {
   }
 
   async _restartMirroring () {
-    for await (const { key } of this.coresDb.createReadStream()) {
-      await this._mirrorCore(key)
+    for await (const { key } of this.basesDb.createReadStream()) {
+      await this._mirrorBase(key)
     }
   }
 
-  async _mirrorCore (key, core, noReplicate) {
-    core = core || this._corestore.get(key)
-    await core.ready()
-    if (!noReplicate) await this.hsClient.replicate(core)
+  async _mirrorBase (key, base, noReplicate) {
+    base = base || this._corestore.get(key)
+    await base.ready()
+    if (!noReplicate) await this.dhClient.replicate(base)
     const keyString = (typeof key === 'string') ? key : key.toString('hex')
     this.downloads.set(keyString, {
-      core,
-      request: core.download()
+      base,
+      request: base.download()
     })
     // TODO: What metadata should we store?
-    await this.coresDb.put(keyString, {})
+    await this.basesDb.put(keyString, {})
     this.mirroring.add(keyString)
   }
 
   // TODO: Make mount-aware
   async _mirrorDrive (key) {
-    const { content, metadata } = await this._getDriveCores(key, true)
+    const { content, metadata } = await this._getDriveBases(key, true)
     return Promise.all([
-      this._mirrorCore(metadata.key, metadata, true),
-      this._mirrorCore(content.key, content, true)
+      this._mirrorBase(metadata.key, metadata, true),
+      this._mirrorBase(content.key, content, true)
     ])
   }
 
-  async _unmirrorCore (key, noUnreplicate) {
+  async _unmirrorBase (key, noUnreplicate) {
     const keyString = (typeof key === 'string') ? key : key.toString('hex')
     if (!this.downloads.has(keyString)) return
-    const { core, request } = this.downloads.get(keyString)
-    if (!noUnreplicate) await this.hsClient.network.configure(core.discoveryKey, {
-      announce: false
-    })
-    core.undownload(request)
+    const { base, request } = this.downloads.get(keyString)
+    if (!noUnreplicate) {
+      await this.dhClient.network.configure(base.discoveryKey, {
+        announce: false
+      })
+    }
+    base.undownload(request)
     this.downloads.delete(keyString)
     this.mirroring.delete(keyString)
-    return this.coresDb.del(keyString)
+    return this.basesDb.del(keyString)
   }
 
   // TODO: Make mount-aware
   async _unmirrorDrive (key) {
     const keyString = (typeof key === 'string') ? key : key.toString('hex')
     if (!this.downloads.has(keyString)) return
-    const { metadata, content } = await this._getDriveCores(key)
-    await this.hsClient.network.configure(metadata.discoveryKey, {
+    const { metadata, content } = await this._getDriveBases(key)
+    await this.dhClient.network.configure(metadata.discoveryKey, {
       announce: false
     })
     return Promise.all([
-      this._unmirrorCore(metadata.key),
-      this._unmirrorCore(content.key)
+      this._unmirrorBase(metadata.key),
+      this._unmirrorBase(content.key)
     ])
   }
 
   async _mirror ({ key, type }) {
     if (typeof key === 'string') key = Buffer.from(key, 'hex')
-    if (!type || type === 'hypercore') await this._mirrorCore(key)
-    else if (type === 'hyperdrive') await this._mirrorDrive(key)
+    if (!type || type === 'ddatabase') await this._mirrorBase(key)
+    else if (type === 'ddrive') await this._mirrorDrive(key)
     await this.typesDb.put(key.toString('hex'), type)
     return this._status({ key, type })
   }
 
   async _unmirror ({ key, type }) {
     if (typeof key === 'string') key = Buffer.from(key, 'hex')
-    if (!type || type === 'hypercore') await this._unmirrorCore(key)
-    else if (type === 'hyperdrive') await this._unmirrorDrive(key)
+    if (!type || type === 'ddatabase') await this._unmirrorBase(key)
+    else if (type === 'ddrive') await this._unmirrorDrive(key)
     await this.typesDb.del(key.toString('hex'))
     return this._status({ key, type })
   }
@@ -186,7 +188,7 @@ module.exports = class MirroringService extends Nanoresource {
       unmirror: this._unmirror.bind(this),
       status: this._status.bind(this),
       list: this._list.bind(this),
-      stop: this._close.bind(this),
+      stop: this._close.bind(this)
     })
   }
 }
