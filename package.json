@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "drpc_dweb rpc/schema.proto --rpc=rpc/index.js --messages=rpc/messages.js",
-    "test": "standard --fix && tape test/*.js"
+    "test": "standard && tape test/*.js"
   },
   "repository": {
     "type": "git",
