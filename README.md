@@ -20,7 +20,7 @@ Then you can import `dhub-mirroring-service/client` inside a script, and it will
 
 The mirror service provides an [DRPC](https://github.com/dwebprotocol/drpc) endpoint with methods for mirroring, unmirror, and listing mirroed dDatabase-based data structures.
 
-Currently it supports mirroring dDrives and individual Hypercores. It doesn't do data-structure detection by looking at DDatabase headers -- you gotta explicitly provide the type.
+Currently it supports mirroring dDrives and individual DDatabases. It doesn't do data-structure detection by looking at DDatabase headers -- you gotta explicitly provide the type.
 
 As of now, dDrive mirroring doesn't handle mounts. Maybe one day
 
